@@ -137,24 +137,54 @@
       };
 
       const handleAnalyze = async () => {
-        setError(''); setResults([]);
-        if (!usernames.trim()) { setError('Please enter at least one Instagram username'); return; }
-        setLoading(true);
-        try {
-          const usernameList = usernames.split('\n').map(u => u.trim().replace('@', ''))
-            .filter(u => u.length > 0 && !u.includes('.com') && !u.includes('http'));
-          if (!usernameList.length) { setError('No valid usernames found. Enter one per line.'); setLoading(false); return; }
-          if (usernameList.length > 10) { setError('Maximum 10 usernames at a time for demo. Upgrade to Pro for unlimited analysis.'); setLoading(false); return; }
-          const analyzed = [];
-          for (const u of usernameList) analyzed.push(await analyzeWithAI(u));
-          analyzed.sort((a,b) => b.buyScore - a.buyScore);
-          setResults(analyzed);
-        } catch {
-          setError('Analysis failed. Please try again.');
-        } finally {
-          setLoading(false);
-        }
-      };
+  setError('');
+  setResults([]);
+
+  if (!usernames.trim()) {
+    setError('Please enter at least one Instagram username');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const usernameList = usernames
+      .split('\n')
+      .map(u => u.trim().replace('@', ''))
+      .filter(u => u.length > 0 && !u.includes('.com') && !u.includes('http'));
+
+    if (usernameList.length === 0) {
+      setError('No valid usernames found. Enter one per line.');
+      setLoading(false);
+      return;
+    }
+
+    const response = await fetch(`${BACKEND_URL}/score-leads`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ usernames: usernameList })
+    });
+
+    if (!response.ok) {
+      throw new Error("Backend error");
+    }
+
+    const data = await response.json();
+    if (!data.results || !Array.isArray(data.results)) {
+      throw new Error("Invalid response format");
+    }
+
+    setResults(data.results);
+  } catch (err) {
+    console.error(err);
+    setError('Analysis failed. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
       const handleClear = () => { setUsernames(''); setResults([]); setError(''); };
 
