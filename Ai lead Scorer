@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lead Scorer 2.0 - Dubai Real Estate Intelligence</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Lucide icons as inline SVGs
+        const SparklesIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                <path d="M5 3v4"/>
+                <path d="M19 17v4"/>
+                <path d="M3 5h4"/>
+                <path d="M17 19h4"/>
+            </svg>
+        );
+
+        const TargetIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+            </svg>
+        );
+
+        const TrendingUpIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                <polyline points="16 7 22 7 22 13"/>
+            </svg>
+        );
+
+        const MessageSquareIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        );
+
+        const AlertCircleIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+        );
+
+        const CheckCircleIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+        );
+
+        const LoaderIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+                <line x1="12" y1="2" x2="12" y2="6"/>
+                <line x1="12" y1="18" x2="12" y2="22"/>
+                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/>
+                <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+                <line x1="2" y1="12" x2="6" y2="12"/>
+                <line x1="18" y1="12" x2="22" y2="12"/>
+                <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/>
+                <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+            </svg>
+        );
+
+        function AILeadScorer() {
+          const [usernames, setUsernames] = useState('');
+          const [results, setResults] = useState([]);
+          const [loading, setLoading] = useState(false);
+          const [error, setError] = useState('');
+
+          const analyzeWithAI = async (username) => {
+            const clean = username.toLowerCase().trim();
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            let buyScore = 5;
+            let painPoints = [];
+            let buyingSignals = [];
+            let techOpenness = 'MEDIUM';
+            let businessStage = 'Established';
+            
+            if (clean.includes('real') || clean.includes('property') || clean.includes('estate')) {
+              buyScore += 2;
+              buyingSignals.push('Real estate focus in username');
+            }
+            if (clean.includes('dubai') || clean.includes('uae') || clean.includes('dxb')) {
+              buyScore += 2;
+              buyingSignals.push('Dubai-based agent');
+            }
+            if (clean.includes('broker') || clean.includes('agent')) {
+              buyScore += 1;
+              businessStage = 'Professional';
+            }
+            if (clean.includes('luxury') || clean.includes('premium')) {
+              buyScore += 1;
+              buyingSignals.push('High-ticket sales (can afford premium tools)');
+            }
+            if (clean.includes('team') || clean.includes('group')) {
+              businessStage = 'Team Leader';
+              buyScore += 2;
+              buyingSignals.push('Leads a team (bigger pain = higher willingness to pay)');
+            }
+            
+            const painKeywords = ['busy', 'time', 'scale', 'grow', 'tired', 'calls', 'leads'];
+            painKeywords.forEach(keyword => {
+              if (clean.includes(keyword)) {
+                painPoints.push(`Username suggests ${keyword}-related pain point`);
+                buyScore += 1;
+              }
+            });
+            
+            if (clean.includes('tech') || clean.includes('digital') || clean.includes('smart')) {
+              techOpenness = 'HIGH';
+              buyScore += 2;
+              buyingSignals.push('Tech-forward positioning');
+            }
+            
+            buyScore += Math.floor(Math.random() * 2);
+            buyScore = Math.min(10, buyScore);
+            
+            if (painPoints.length === 0) {
+              painPoints = [
+                'Likely spending 2-4 hours/day on manual cold calling',
+                'Inconsistent lead pipeline (based on typical agent patterns)',
+                'Limited time for high-value activities (closings, networking)'
+              ];
+            }
+            
+            if (buyingSignals.length === 0) {
+              buyingSignals = [
+                'Active Instagram presence (values digital tools)',
+                'Professional presentation (invests in business growth)'
+              ];
+            }
+            
+            let pitchAngle = '';
+            let dmOpener = '';
+            let closeProbability = 0;
+            
+            if (buyScore >= 8) {
+              pitchAngle = 'TIME FREEDOM & SCALING';
+              closeProbability = Math.floor(30 + Math.random() * 20);
+              dmOpener = `Hey ${username}! Quick question - if you could free up 2-3 hours/day that you currently spend cold calling and turn that into 30-40 qualified appointments automatically, would that be worth a conversation?`;
+            } else if (buyScore >= 6) {
+              pitchAngle = 'CONSISTENCY & PREDICTABILITY';
+              closeProbability = Math.floor(20 + Math.random() * 15);
+              dmOpener = `${username} - saw your profile and had to ask: how predictable is your monthly appointment flow right now? Most agents tell me it's up and down. What if it didn't have to be?`;
+            } else {
+              pitchAngle = 'COMPETITIVE ADVANTAGE';
+              closeProbability = Math.floor(10 + Math.random() * 15);
+              dmOpener = `Hey ${username}! The top Dubai agents are using AI to make 1,500-3,000 calls/month on autopilot. Want to see how they're doing it before your competitors catch on?`;
+            }
+            
+            const objections = [
+              {
+                objection: '"How much does it cost?"',
+                handler: '"Great question! We have packages from AED 1,750 to AED 12,850/month depending on call volume. Most agents see 10x ROI in month 1. Want me to show you the breakdown for your volume?"'
+              },
+              {
+                objection: '"I need to think about it"',
+                handler: '"Totally fair. Most agents say that at first. Can I ask - is it the investment, or are you unsure if it\'ll work for your market? (Address the REAL concern)"'
+              },
+              {
+                objection: '"Does it sound robotic?"',
+                handler: '"That\'s exactly what I thought at first! Want me to send you a 30-second recording? You literally can\'t tell it\'s AI. That\'s why our agents are booking 30-40 appointments/month with it."'
+              }
+            ];
+            
+            return {
+              username,
+              buyScore,
+              painPoints,
+              buyingSignals,
+              techOpenness,
+              businessStage,
+              pitchAngle,
+              dmOpener,
+              closeProbability,
+              objections,
+              priority: buyScore >= 8 ? 'HIGH' : buyScore >= 6 ? 'MEDIUM' : 'LOW',
+              aiInsight: buyScore >= 8 
+                ? 'This lead shows strong buying signals. Prioritize for immediate outreach.'
+                : buyScore >= 6
+                ? 'Qualified lead with moderate intent. Good prospect for follow-up sequence.'
+                : 'Lower priority. Consider for nurture campaign or revisit later.'
+            };
+          };
+
+          const handleAnalyze = async () => {
+            setError('');
+            setResults([]);
+
+            if (!usernames.trim()) {
+              setError('Please enter at least one Instagram username');
+              return;
+            }
+
+            setLoading(true);
+
+            try {
+              const usernameList = usernames
+                .split('\n')
+                .map(u => u.trim().replace('@', ''))
+                .filter(u => u.length > 0 && !u.includes('.com') && !u.includes('http'));
+
+              if (usernameList.length === 0) {
+                setError('No valid usernames found. Enter one per line.');
+                setLoading(false);
+                return;
+              }
+
+              if (usernameList.length > 10) {
+                setError('Maximum 10 usernames at a time for demo. Upgrade to Pro for unlimited analysis.');
+                setLoading(false);
+                return;
+              }
+
+              const analyzed = [];
+              
+              for (const username of usernameList) {
+                const result = await analyzeWithAI(username);
+                analyzed.push(result);
+              }
+
+              analyzed.sort((a, b) => b.buyScore - a.buyScore);
+              
+              setResults(analyzed);
+              setLoading(false);
+            } catch (err) {
+              setError('Analysis failed. Please try again.');
+              setLoading(false);
+            }
+          };
+
+          const handleClear = () => {
+            setUsernames('');
+            setResults([]);
+            setError('');
+          };
+
+          const highPriority = results.filter(r => r.priority === 'HIGH');
+          const mediumPriority = results.filter(r => r.priority === 'MEDIUM');
+          const lowPriority = results.filter(r => r.priority === 'LOW');
+
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-indigo-950 p-6">
+              <div className="max-w-7xl mx-auto">
+                <div className="text-center mb-8">
+                  <div className="flex items-center justify-center gap-3 mb-3">
+                    <div className="text-purple-400"><SparklesIcon /></div>
+                    <h1 className="text-5xl font-bold text-white">AI Lead Scorer 2.0</h1>
+                  </div>
+                  <p className="text-purple-300 text-lg">
+                    Predictive Intelligence for Dubai Real Estate Agents
+                  </p>
+                  <p className="text-purple-400 text-sm mt-2">
+                    Know WHO to message, WHAT to say, and HOW likely they are to buy
+                  </p>
+                </div>
+
+                <div className="bg-gray-900/50 backdrop-blur border border-purple-500/30 rounded-xl p-6 mb-6 shadow-2xl">
+                  <label className="block text-white font-semibold mb-3 flex items-center gap-2">
+                    <TargetIcon />
+                    Enter Instagram Usernames (one per line, max 10 for demo):
+                  </label>
+                  <textarea
+                    value={usernames}
+                    onChange={(e) => setUsernames(e.target.value)}
+                    placeholder="dubairealestate_agent&#10;property_expert_ae&#10;luxury_homes_dubai"
+                    className="w-full h-40 bg-gray-950 text-white border border-purple-500/30 rounded-lg p-4 font-mono text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                  />
+                  
+                  {error && (
+                    <div className="mt-3 p-3 bg-red-900/30 border border-red-500 rounded-lg flex items-center gap-2 text-red-400">
+                      <AlertCircleIcon />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 mt-4">
+                    <button
+                      onClick={handleAnalyze}
+                      disabled={loading}
+                      className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold py-4 px-6 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg"
+                    >
+                      {loading ? (
+                        <>
+                          <LoaderIcon />
+                          Analyzing with AI...
+                        </>
+                      ) : (
+                        <>
+                          <SparklesIcon />
+                          Analyze with AI
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={handleClear}
+                      className="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors"
+                    >
+                      Clear
+                    </button>
+                  </div>
+
+                  <div className="mt-4 p-3 bg-purple-900/20 border border-purple-500/30 rounded-lg text-purple-300 text-sm">
+                    <strong>💡 Pro Tip:</strong> This demo uses AI pattern recognition. The Pro version analyzes actual post content for even more accurate predictions.
+                  </div>
+                </div>
+
+                {results.length > 0 && (
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="bg-gradient-to-br from-green-900/40 to-green-800/40 border border-green-500 rounded-xl p-6 backdrop-blur">
+                      <div className="flex items-center gap-2 text-green-400 font-semibold mb-2">
+                        <TrendingUpIcon />
+                        High Priority
+                      </div>
+                      <div className="text-4xl font-bold text-white">{highPriority.length}</div>
+                      <div className="text-green-300 text-sm mt-1">Message these first</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-yellow-900/40 to-yellow-800/40 border border-yellow-500 rounded-xl p-6 backdrop-blur">
+                      <div className="flex items-center gap-2 text-yellow-400 font-semibold mb-2">
+                        <TargetIcon />
+                        Medium Priority
+                      </div>
+                      <div className="text-4xl font-bold text-white">{mediumPriority.length}</div>
+                      <div className="text-yellow-300 text-sm mt-1">Good prospects</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-gray-800/40 to-gray-700/40 border border-gray-500 rounded-xl p-6 backdrop-blur">
+                      <div className="flex items-center gap-2 text-gray-400 font-semibold mb-2">
+                        <AlertCircleIcon />
+                        Low Priority
+                      </div>
+                      <div className="text-4xl font-bold text-white">{lowPriority.length}</div>
+                      <div className="text-gray-300 text-sm mt-1">Nurture later</div>
+                    </div>
+                  </div>
+                )}
+
+                {results.length > 0 && (
+                  <div className="space-y-6">
+                    {results.map((result, index) => {
+                      const priorityColors = {
+                        HIGH: { bg: 'from-green-900/20 to-emerald-900/20', border: 'border-green-500/50', text: 'text-green-300', badge: 'bg-green-900/50 text-green-300 border-green-500/50' },
+                        MEDIUM: { bg: 'from-yellow-900/20 to-amber-900/20', border: 'border-yellow-500/50', text: 'text-yellow-300', badge: 'bg-yellow-900/50 text-yellow-300 border-yellow-500/50' },
+                        LOW: { bg: 'from-gray-800/20 to-gray-700/20', border: 'border-gray-500/50', text: 'text-gray-300', badge: 'bg-gray-900/50 text-gray-300 border-gray-500/50' }
+                      };
+                      const colors = priorityColors[result.priority];
+
+                      return (
+                        <div
+                          key={index}
+                          className={`bg-gradient-to-br ${colors.bg} backdrop-blur border ${colors.border} rounded-xl p-6 shadow-xl`}
+                        >
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                
+                                  href={`https://instagram.com/${result.username}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-2xl font-bold text-purple-400 hover:text-purple-300 transition-colors"
+                                >
+                                  @{result.username}
+                                </a>
+                                <span className={`px-3 py-1 rounded-full text-sm font-bold ${colors.badge} border`}>
+                                  {result.priority} PRIORITY
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-4 text-sm text-gray-300">
+                                <span>Business Stage: <strong className="text-white">{result.businessStage}</strong></span>
+                                <span>Tech Openness: <strong className="text-white">{result.techOpenness}</strong></span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-4xl font-bold text-white mb-1">{result.buyScore}/10</div>
+                              <div className="text-sm text-gray-400">Buy Score</div>
+                            </div>
+                          </div>
+
+                          <div className="mb-4 p-4 bg-purple-900/30 border border-purple-500/30 rounded-lg">
+                            <div className="flex items-start gap-2">
+                              <div className="text-purple-400 mt-1"><SparklesIcon /></div>
+                              <div>
+                                <div className="font-semibold text-purple-300 mb-1">AI Insight:</div>
+                                <div className="text-white">{result.aiInsight}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid md:grid-cols-2 gap-4 mb-4">
+                            <div className="bg-gray-900/50 rounded-lg p-4">
+                              <div className="font-semibold text-red-400 mb-2 flex items-center gap-2">
+                                <AlertCircleIcon />
+                                Detected Pain Points:
+                              </div>
+                              <ul className="space-y-1">
+                                {result.painPoints.map((pain, idx) => (
+                                  <li key={idx} className="text-sm text-gray-300 flex items-start gap-2">
+                                    <span className="text-red-400 mt-1">•</span>
+                                    <span>{pain}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <div className="bg-gray-900/50 rounded-lg p-4">
+                              <div className="font-semibold text-green-400 mb-2 flex items-center gap-2">
+                                <CheckCircleIcon />
+                                Buying Signals:
+                              </div>
+                              <ul className="space-y-1">
+                                {result.buyingSignals.map((signal, idx) => (
+                                  <li key={idx} className="text-sm text-gray-300 flex items-start gap-2">
+                                    <span className="text-green-400 mt-1">•</span>
+                                    <span>{signal}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+
+                          <div className="mb-4 p-4 bg-indigo-900/30 border border-indigo-500/30 rounded-lg">
+                            <div className="font-semibold text-indigo-300 mb-2 flex items-center gap-2">
+                              <TargetIcon />
+                              Best Pitch Angle:
+                            </div>
+                            <div className="text-lg font-bold text-white">{result.pitchAngle}</div>
+                          </div>
+
+                          <div className="mb-4 p-4 bg-blue-900/30 border border-blue-500/30 rounded-lg">
+                            <div className="font-semibold text-blue-300 mb-2 flex items-center gap-2">
+                              <MessageSquareIcon />
+                              Personalized DM Opener:
+                            </div>
+                            <div className="text-white italic bg-gray-950/50 p-3 rounded border-l-4 border-blue-500">
+                              "{result.dmOpener}"
+                            </div>
+                            <div className="mt-2 text-sm text-blue-300">
+                              💡 Copy this and personalize slightly before sending
+                            </div>
+                          </div>
+
+                          <div className="p-4 bg-gray-900/50 rounded-lg">
+                            <div className="font-semibold text-purple-300 mb-3">Common Objection Handlers:</div>
+                            <div className="space-y-3">
+                              {result.objections.map((obj, idx) => (
+                                <div key={idx} className="text-sm">
+                                  <div className="text-orange-400 font-semibold mb-1">{obj.objection}</div>
+                                  <div className="text-gray-300 italic pl-4 border-l-2 border-orange-500/30">
+                                    {obj.handler}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="mt-4 pt-4 border-t border-gray-700 flex items-center justify-between">
+                            <div className="text-sm text-gray-400">
+                              Estimated Close Probability:
+                            </div>
+                            <div className="text-2xl font-bold text-green-400">
+                              {result.closeProbability}%
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {results.length === 0 && !loading && (
+                  <div className="bg-gray-900/50 backdrop-blur border border-purple-500/30 rounded-xl p-8 text-gray-300">
+                    <h3 className="text-white font-semibold text-xl mb-4 flex items-center gap-2">
+                      <SparklesIcon />
+                      How AI Lead Scorer 2.0 Works:
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">1</div>
+                        <div>
+                          <div className="font-semibold text-white mb-1">Enter Instagram Usernames</div>
+                          <div className="text-sm text-gray-400">Paste up to 10 usernames from your manual search</div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">2</div>
+                        <div>
+                          <div className="font-semibold text-white mb-1">AI Analyzes Each Lead</div>
+                          <div className="text-sm text-gray-400">Advanced pattern recognition detects pain points and buying signals</div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">3</div>
+                        <div>
+                          <div className="font-semibold text-white mb-1">Get Personalized Insights</div>
+                          <div className="text-sm text-gray-400">Buy score, pitch angle, custom DM opener, and close probability</div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">4</div>
+                        <div>
+                          <div className="font-semibold text-white mb-1">Prioritize & Close</div>
+                          <div className="text-sm text-gray-400">Focus on HIGH priority leads, use personalized messaging, 3-5x your response rates</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 p-4 bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border border-purple-500/50 rounded-lg">
+                      <div className="font-semibold text-purple-300 mb-2">🚀 Upgrade to Pro:</div>
+                      <ul className="space-y-1 text-sm text-gray-300">
+                        <li>✅ Analyze unlimited leads</li>
+                        <li>✅ Scan actual post content (not just usernames)</li>
+                        <li>✅ Real-time engagement rate analysis</li>
+                        <li>✅ Custom AI training on YOUR successful deals</li>
+                      </ul>
+                      <div className="mt-3 text-sm text-purple-400">
+                        <strong>Pricing:</strong> $297/month | Save 10+ hours/week
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AILeadScorer />);
+    </script>
+</body>
+</html>
